@@ -1,0 +1,85 @@
+package ca.umontreal.iro.hackathon.loderunner;
+
+import java.util.List;
+
+import sunrise.GameEntity;
+import sunrise.astar.AStar;
+import sunrise.astar.Graph;
+import sunrise.astar.NodeAStar;
+import sunrise.vector.Vector2d;
+
+/**
+ *
+ */
+public class Runner extends BasicRunner {
+
+    // TODO : Remplacer ceci par votre clé secrète
+    public static final String ROOM = "charlie";
+
+    /* Utilisez cette variable pour choisir le niveau de départ
+     *
+     * Notez: le niveau de départ sera 1 pour tout
+     * le monde pendant la compétition :v)
+     */
+    public static final int START_LEVEL = 1;
+    
+    private GameEntity[][] elements;
+    
+    private int index;
+    private List<NodeAStar> listeDeNoeud;   
+    private List<NodeAStar> listeDeSous;
+    
+    private NodeAStar currentPosition;
+    private NodeAStar expectedPosition;
+    private NodeAStar doorPosition;
+    
+    public Runner() {
+        super(ROOM, START_LEVEL);
+    }
+
+    @Override
+    public void start(String[] grid) {
+        elements = new GameEntity[grid[0].length()][grid.length];
+        
+        for (int i=0; i<grid[0].length(); i++) {
+            for(int j = 0; j < grid.length; j++){
+            	elements[i][j] = GameEntity.fromString(String.valueOf(grid[j].charAt(i)));
+            	if(elements[i][j].equals( GameEntity.Sortie)) {
+            		doorPosition = new NodeAStar(new Vector2d(i, j)); 
+            	}
+            }
+        }
+        
+        printMap();
+    }
+
+    @Override
+    public Move next(int x, int y) {
+    	currentPosition = new NodeAStar(new Vector2d(x, y));
+    	
+    	if(!expectedPosition.getPos().equals(currentPosition.getPos())) {
+    		elements[(int) currentPosition.getPos().getX()][(int) currentPosition.getPos().getX()] = GameEntity.CaseVide;
+    		listeDeNoeud = AStar.search(new Graph(elements), currentPosition, doorPosition);
+    		index = 0;
+    	}
+    	
+    	int direction = Direction.prochaineDirectionAStar(listeDeNoeud, index);
+		Direction dir = Direction.fromInt(direction);
+    	index = index + 1;
+    	expectedPosition = listeDeNoeud.get(index);
+    	
+    	Move nextMove = new Move(Event.MOVE, dir);
+    	
+    	return nextMove;
+    }
+    
+    public void printMap(){
+    	for(int j = 0; j < elements[0].length; j++){
+    		for(int i = 0; i < elements.length; i++){
+    			System.out.print(elements[i][j]);
+    		}
+    		
+    		System.out.println();
+    	}
+    }
+}

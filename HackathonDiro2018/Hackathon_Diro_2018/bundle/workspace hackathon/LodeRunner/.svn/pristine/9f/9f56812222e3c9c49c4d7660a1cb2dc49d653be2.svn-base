@@ -1,0 +1,152 @@
+package ca.umontreal.iro.hackathon.loderunner;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.PriorityQueue;
+
+import sunrise.GameEntity;
+import sunrise.astar.AStar;
+import sunrise.astar.Graph;
+import sunrise.astar.NodeAStar;
+import sunrise.vector.Vector2d;
+
+/**
+ *
+ */
+public class Runner extends BasicRunner {
+
+    // TODO : Remplacer ceci par votre clé secrète
+    public static final String ROOM = "adhaksdhac";
+
+    /* Utilisez cette variable pour choisir le niveau de départ
+     *
+     * Notez: le niveau de départ sera 1 pour tout
+     * le monde pendant la compétition :v)
+     */
+    public static final int START_LEVEL = 1;
+    
+    private GameEntity[][] elements;
+    
+    private int index;
+    
+    private List<NodeAStar> listeDeNoeuds = new ArrayList<NodeAStar>();   
+    private List<NodeAStar> listeDeSous = new ArrayList<NodeAStar>();
+    
+    private NodeAStar currentPosition;
+    private NodeAStar expectedPosition;
+    private NodeAStar doorPosition;
+    
+    private PriorityQueue<Move> nextActions;
+    
+    public Runner() {
+        super(ROOM, START_LEVEL);
+    }
+
+    @Override
+    public void start(String[] grid) {
+    	nextActions = new PriorityQueue<Move>();
+        elements = new GameEntity[grid[0].length()][grid.length];
+        
+        for (int i=0; i<grid[0].length(); i++) {
+            for(int j = 0; j < grid.length; j++){
+            	elements[i][j] = GameEntity.fromString(String.valueOf(grid[j].charAt(i)));
+            	if(elements[i][j].equals( GameEntity.Sortie)) {
+            		doorPosition = new NodeAStar(new Vector2d(i, j)); 
+            	}
+            	if(elements[i][j].equals( GameEntity.LingotOr)) {
+                    listeDeSous.add( new NodeAStar(new Vector2d(i, j))); 
+                }
+            }
+        }       
+        
+        printMap();
+    }
+
+    @Override
+    public Move next(int x, int y) {
+
+    	currentPosition = new NodeAStar(new Vector2d(x, y));
+    	
+    	//1. Cas de la case invisible
+    	if(expectedPosition != null && !currentPosition.equals(expectedPosition.getPos()) && elements[(int) currentPosition.getPos().getX()][(int) currentPosition.getPos().getY()].equals(GameEntity.BlockBrique)){
+    		elements[(int) currentPosition.getPos().getX()][(int) currentPosition.getPos().getY()] = GameEntity.CaseVide;
+    		
+    		return new Move(Event.MOVE, Direction.NONE);
+    	}
+    	
+    	if(nextActions.isEmpty()){
+    		
+    		//2. Trou sépare
+    		
+    		if(expectedPosition != null && !currentPosition.equals(expectedPosition.getPos())){
+    			//3. Capturer après mur
+        		if(elements[(int) currentPosition.getPos().getX()][(int) currentPosition.getPos().getY()].equals(GameEntity.BlockBrique)){
+        			capturerDansMur();
+        		} else {
+        			//4. Creuser pour s'échapper
+        			creuserEchapper();
+        		}
+    		}
+    		
+    		
+    		//5. Quand il y a du vide en dessous -> annuler les actions
+    		if(videEnDessous() && elements[(int) currentPosition.getPos().getX()][(int) currentPosition.getPos().getY()].equals(GameEntity.Corde) &&
+    				elements[(int) currentPosition.getPos().getX()][(int) currentPosition.getPos().getY()].equals(GameEntity.Echelle)){
+    			return new Move(Event.MOVE, Direction.NONE);
+    		}
+    		
+    		if(listeDeNoeuds == null || expectedPosition == null) {
+    			listeDeNoeuds = getListeDeNoeudsOptimal();
+    		}
+    		
+    		int direction = Direction.prochaineDirectionAStar(listeDeNoeuds, index);
+    		Direction dir = Direction.fromInt(direction);
+        	Move nextMove = new Move(Event.MOVE, dir);
+        	
+        	if(!(index >= listeDeNoeuds.size() - 1)){
+        		expectedPosition = listeDeNoeuds.get(++index);
+        	}
+
+            return nextMove;
+    	} else {
+    		if(nextActions.peek().event.equals(Event.MOVE)){
+    			nextActions.peek().direction.getValue();
+    		}
+    		
+    		return nextActions.remove();
+    	}
+    }
+    
+    public void capturerDansMur(){
+    	
+    }
+    
+    public void creuserEchapper(){
+    	
+    }
+    
+    private List<NodeAStar> getListeDeNoeudsOptimal() {
+        listeDeNoeuds.addAll(AStar.search(new Graph(elements), currentPosition, listeDeSous.get(0)));
+        System.out.println(listeDeNoeuds.toString());
+        for(int x =0 ; x<listeDeSous.size()-1; x++) {
+            listeDeNoeuds.addAll(AStar.search(new Graph(elements), listeDeSous.get(x), listeDeSous.get(x+1)));
+            System.out.println(listeDeNoeuds.toString());
+        }
+            listeDeNoeuds.addAll(AStar.search(new Graph(elements), listeDeSous.get(listeDeSous.size()-1), doorPosition));
+            return listeDeNoeuds;
+    }
+    
+    public boolean videEnDessous(){
+    	return elements[(int) currentPosition.getPos().getX()][(int) (currentPosition.getPos().getY() + 1)].equals(GameEntity.CaseVide);
+    }
+    
+    public void printMap(){
+    	for(int j = 0; j < elements[0].length; j++){
+    		for(int i = 0; i < elements.length; i++){
+    			System.out.print(elements[i][j]);
+    		}
+    		
+    		System.out.println();
+    	}
+    }
+}

@@ -1,0 +1,115 @@
+package ca.umontreal.iro.hackathon.loderunner;
+
+import java.util.List;
+import java.util.PriorityQueue;
+
+import sunrise.GameEntity;
+import sunrise.astar.AStar;
+import sunrise.astar.Graph;
+import sunrise.astar.NodeAStar;
+import sunrise.vector.Vector2d;
+
+/**
+ *
+ */
+public class Runner extends BasicRunner {
+
+    // TODO : Remplacer ceci par votre clé secrète
+    public static final String ROOM = "adhaksdhac";
+
+    /* Utilisez cette variable pour choisir le niveau de départ
+     *
+     * Notez: le niveau de départ sera 1 pour tout
+     * le monde pendant la compétition :v)
+     */
+    public static final int START_LEVEL = 6;
+    
+    private GameEntity[][] elements;
+    
+    private int index;
+    private List<NodeAStar> listeDeNoeud;   
+    private List<NodeAStar> listeDeSous;
+    
+    private NodeAStar currentPosition;
+    private NodeAStar expectedPosition;
+    private NodeAStar doorPosition;
+    
+    private PriorityQueue<Move> nextActions;
+    
+    public Runner() {
+        super(ROOM, START_LEVEL);
+    }
+
+    @Override
+    public void start(String[] grid) {
+    	nextActions = new PriorityQueue<Move>();
+    	
+        elements = new GameEntity[grid[0].length()][grid.length];
+        
+        for (int i=0; i<grid[0].length(); i++) {
+            for(int j = 0; j < grid.length; j++){
+            	elements[i][j] = GameEntity.fromString(String.valueOf(grid[j].charAt(i)));
+            	if(elements[i][j].equals( GameEntity.Sortie)) {
+            		doorPosition = new NodeAStar(new Vector2d(i, j)); 
+            	}
+            }
+        }       
+        
+        printMap();
+    }
+
+    @Override
+    public Move next(int x, int y) {    	
+    	currentPosition = new NodeAStar(new Vector2d(x, y));
+    	
+    	if(nextActions.isEmpty()){
+    		//1. Cas de la case invisible
+    		
+    		//2. Trou sépare
+    		
+    		//3. Capturer après mur
+    		
+    		//4. Creuser pour s'échapper
+    		
+    		
+    		//5. Quand il y a du vide en dessous -> annuler les actions
+    		if(videEnDessous()){
+    			return new Move(Event.MOVE, Direction.NONE);
+    		}
+    		
+    		if(listeDeNoeud == null || expectedPosition == null) {
+    			listeDeNoeud = getListeOptimale();
+    		}
+    		
+    		int direction = Direction.prochaineDirectionAStar(listeDeNoeud, index);
+    		Direction dir = Direction.fromInt(direction);
+        	Move nextMove = new Move(Event.MOVE, dir);
+        	
+        	if(!(index >= listeDeNoeud.size() - 1)){
+        		expectedPosition = listeDeNoeud.get(++index);
+        	}
+
+            return nextMove;
+    	} else {
+    		if(nextActions.peek().event.equals(Event.MOVE)){
+    			nextActions.peek().direction.getValue();
+    		}
+    		
+    		return nextActions.remove();
+    	}
+    }
+    
+    public boolean videEnDessous(){
+    	return elements[(int) currentPosition.getPos().getX()][(int) (currentPosition.getPos().getY() + 1)].equals(GameEntity.CaseVide);
+    }
+    
+    public void printMap(){
+    	for(int j = 0; j < elements[0].length; j++){
+    		for(int i = 0; i < elements.length; i++){
+    			System.out.print(elements[i][j]);
+    		}
+    		
+    		System.out.println();
+    	}
+    }
+}

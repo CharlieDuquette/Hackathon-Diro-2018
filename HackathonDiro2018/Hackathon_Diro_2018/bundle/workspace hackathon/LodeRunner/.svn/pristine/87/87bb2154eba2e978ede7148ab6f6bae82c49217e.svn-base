@@ -1,0 +1,13 @@
+package sunrise;
+
+public class TestDeMarde {
+	public static void main(String args[]){
+		 elements = new GameEntity[3][2];
+	        elements[2][0] = GameEntity.Runner;
+	        elements[1][0] = GameEntity.CaseVide;
+	        elements[0][0] = GameEntity.Sortie;
+	        elements[2][1] = GameEntity.BlockBrique;
+	        elements[1][1] = GameEntity.BlockBrique;
+	        elements[0][1] = GameEntity.BlockBrique;
+	}
+}

@@ -1,0 +1,76 @@
+package sunrise.astar;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Stack;
+
+import sunrise.astar.*;
+
+public class AStar {
+	
+	
+	public static List<Node> search(Graph graph, Node start, Node goal){
+		
+		PriorityQueue<Node> openList = new PriorityQueue<Node>((n1,n2) -> (int) (n1.getFScore() - n2.getFScore()));
+		HashSet<Node> closedList = new HashSet<Node>();
+		
+		start.setParent(null);
+		start.setGScore(0);
+		openList.add(start);
+		
+		while (!openList.isEmpty()) {
+			Node q = openList.poll();
+			
+			if(q.equals(goal))
+				return constructPath(start,q);
+			
+			HashSet<Node> temp = graph.getEdgesFrom(q);
+			
+			for(Node successor : graph.getEdgesFrom(q)) {
+				if (closedList.contains(successor))
+					continue;
+				
+				double t_gScore = q.getGScore() + successor.getPos().substract(q.getPos()).modulus();
+				
+				if(t_gScore < successor.getGScore()) {
+					successor.setGScore(t_gScore);
+					successor.calcFScore();
+					
+					successor.setParent(q);
+					if(!openList.contains(successor)) {
+						openList.add(successor);
+					}
+				}
+				
+			}
+
+		}
+		return null;
+	}
+
+	private static List<Node> constructPath(Node start, Node goal) {
+		ArrayList<Node> path = new ArrayList<>();
+		Stack<Node> stackNode = new Stack<Node>();
+		Node t = goal;
+		
+		while(true){
+			stackNode.add(t);
+			if(t.getParent() != null) {
+				t = t.getParent();
+				continue;
+			}
+			break;
+		}
+		
+		while(!stackNode.isEmpty()) {
+			path.add(stackNode.pop());
+		}
+		
+		return path;
+	}
+	
+	
+}
+

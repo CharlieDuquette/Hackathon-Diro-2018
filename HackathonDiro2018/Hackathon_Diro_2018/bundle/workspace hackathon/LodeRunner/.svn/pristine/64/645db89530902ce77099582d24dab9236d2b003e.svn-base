@@ -1,0 +1,46 @@
+package sunrise.astar;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import sunrise.astar.*;
+import sunrise.vector.*;
+
+public class Graph {
+		HashMap<Node,HashSet<Node>> graph;
+	
+	public Graph() {
+		graph = new HashMap<Node,HashSet<Node>>();
+	}
+	
+	public void addNode(Node n) {
+		graph.put(n, new HashSet<Node>());
+	}
+	
+	public void addEdge(Node n, Node edge) {
+		graph.get(n).add(edge);
+	}
+	
+	public HashSet<Node> getEdgesFrom(Node n) {
+		return graph.get(n);
+	}
+	
+	public Node getNodeAtPos(Vector2d pos) {
+	    Iterator<Entry<Node, HashSet<Node>>> i = graph.entrySet().iterator();
+	    while(i.hasNext()) {
+	    	Entry<Node, HashSet<Node>> next = i.next();
+	    	
+	    	for(Node n : next.getValue()) {
+	    		if(n.getPos().equals(pos))
+	    			return n;
+	    	}
+	    }
+	    return null;
+	}
+	
+	
+	
+	
+
+}

@@ -1,0 +1,60 @@
+package ca.umontreal.iro.hackathon.loderunner;
+
+import sunrise.GameEntity;
+
+/**
+ *
+ */
+public class Runner extends BasicRunner {
+
+    // TODO : Remplacer ceci par votre clé secrète
+    public static final String ROOM = "REEEEEEEEEEEEE";
+
+    /* Utilisez cette variable pour choisir le niveau de départ
+     *
+     * Notez: le niveau de départ sera 1 pour tout
+     * le monde pendant la compétition :v)
+     */
+    public static final int START_LEVEL = 1;
+    
+    private GameEntity[][] elements;
+
+    public Runner() {
+        super(ROOM, START_LEVEL);
+    }
+
+    @Override
+    public void start(String[] grid) {
+        System.out.println("Nouveau niveau ! Grille initiale reçue :");
+        
+        elements = new GameEntity[grid[0].length()][grid.length];
+        
+        for (int i=0; i<grid[0].length(); i++) {
+            for(int j = 0; j < grid.length; j++){
+            	elements[i][j] = GameEntity.fromString(String.valueOf(grid[j].charAt(i)));
+            }
+        }
+        
+        printMap();
+    }
+
+    @Override
+    public Move next(int x, int y) {
+    	
+        int direction = (int) (Math.random() * 4 + 1);
+
+        Direction dir = Direction.fromInt(direction);
+
+        return new Move(Event.MOVE, dir);
+    }
+    
+    public void printMap(){
+    	for(int j = 0; j < elements[0].length; j++){
+    		for(int i = 0; i < elements.length; i++){
+    			System.out.print(elements[i][j]);
+    		}
+    		
+    		System.out.println();
+    	}
+    }
+}

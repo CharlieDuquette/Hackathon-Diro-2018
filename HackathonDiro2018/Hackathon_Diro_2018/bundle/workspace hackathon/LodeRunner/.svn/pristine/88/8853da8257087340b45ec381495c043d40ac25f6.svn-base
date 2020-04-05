@@ -1,0 +1,395 @@
+package sunrise.vector;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.List;
+/**
+ * <p>
+ * La classe <b>Vector2d</b> repr�sente une vecteur � deux dimensions. 
+ * </p>
+ * 
+ * <p>
+ * Les op�rations math�matiques support�es sont les suivantes : 
+ * <ul>- L'addition.</ul>
+ * <ul>- La soustraction.</ul>
+ * <ul>- La multiplication par un scalaire.</ul>
+ * <ul>- Le produit scalaire (<i>dot product</i>).</ul>
+ * <ul>- Le produit vectoriel (<i>cross product</i>).</ul>
+ * </p>
+ * 
+ * @author Karl-Étienne Bolduc
+ * @since 2014-12-16
+ * @version 2016-12-15
+ */
+
+public class Vector2d{
+
+	  //---------------
+	  // CONSTANTES  //
+	  //---------------
+
+	  /**
+	   * La constante 'DEFAULT_COMPONENT' correspond � la composante par d�faut des variables x,y et z du vecteur �tant �gale � {@value}.
+	   */
+		private static final double  DEFAULT_COMPONENT = 0.0;
+
+		/**
+	   * La constante <b>ORIGIN</b> repr�sente le vecteur origine �tant situ� � la coordonn�e (0.0, 0.0, 0.0).
+	   * Ce vecteur peut �galement repr�senter un vecteur orientation <b>sans</b> orientation.
+	   */
+		public static final Vector2d ORIGIN = new Vector2d(0.0, 0.0);
+		
+		//--------------
+		// VARIABLES  //
+		//--------------
+		
+		/**
+		 * La variable <b>x</b> correspond � la composante x du vecteur 3d.
+		 */
+		protected double x;
+		
+		/**
+	   * La variable <b>y</b> correspond � la composante y du vecteur 3d.
+	   */
+		protected double y;	
+		
+		//-----------------------------
+		// CONSTRUCTEURS ET M�THODES //
+		//-----------------------------
+		/**
+		 * Constructeur repr�sentant un vecteur 3d � l'origine d'un syst�me d'axe xyz.
+		 */
+		public Vector2d()
+		{
+			x = DEFAULT_COMPONENT;
+			y = DEFAULT_COMPONENT;
+		}
+		
+		/**
+		 * Constructeur avec composante x,y et z du vecteur 3d.
+		 * 
+		 * @param x - La composante x du vecteur.
+		 * @param y - La composante y du vecteur.
+		 * @param z - La composante z du vecteur.
+		 */
+		public Vector2d(double x, double y)
+		{
+			this.x = x;
+			this.y = y;
+		}
+		
+		public Vector2d(Vector2d v)
+		{
+			this.x = v.x;
+			this.y = v.y;
+		}
+
+		/**
+		 * M�thode qui modifie l'acc�s � la coordonn�e x du vecteur.
+		 * 
+		 * @return La coordonn�e x.
+		 */
+		public void setX(double x)
+		{ 
+		  this.x = x;
+		}
+		
+		/**
+		 * M�thode qui modifie l'acc�s � la coordonn�e y du vecteur.
+		 * 
+		 * @return La coordonn�e y.
+		 */
+		public void setY(double y)
+		{ 
+		  this.y = y;
+		}
+		
+		/**
+		 * M�thode qui donne acc�s � la coordonn�e x du vecteur.
+		 * 
+		 * @return La coordonn�e x.
+		 */
+		public double getX()
+		{ 
+		  return x;
+		}
+		
+		/**
+		 * M�thode qui donne acc�s � la coordonn�e y du vecteur.
+		 * 
+		 * @return La coordonn�e y.
+		 */
+		public double getY()
+		{ 
+		  return y;
+		}
+		 
+		/**
+		 * M�thode qui retourne <b>l'addition</b> de deux vecteurs. 
+		 * 
+		 * @param v - Le vecteur � ajouter au vecteur pr�sent.
+		 * @return La somme des deux vecteurs.
+		 */
+		public Vector2d add(Vector2d v)
+		{	
+			return new Vector2d(x + v.x, y + v.y);
+		}
+		
+		/**
+		 * M�thode qui retourne la <b> soustraction </b> de deux vecteurs. 
+		 * 
+		 * @param v - Le vecteur � soustraire au vecteur pr�sent.
+		 * @return La soustraction des deux vecteurs.
+		 */
+		public Vector2d substract(Vector2d v)
+		{
+			return new Vector2d(x - v.x, y - v.y);
+		}
+		
+		/**
+		 * M�thode qui effectue la <b>multiplication par une scalaire</b> sur un vecteur.
+		 * 
+		 * @param m - Le muliplicateur.
+		 * @return Le r�sultat de la multiplication par un scalaire m sur le vecteur.
+		 */
+		public Vector2d multiply(double m)
+		{
+			return new Vector2d(m*x, m*y);
+		}
+		
+	/**
+		 * M�thode pour obtenir le <b> module </b> d'un vecteur.
+		 * 
+		 * @return Le module du vecteur.
+		 */
+		public double modulus()
+		{
+			return Math.sqrt((x*x) + (y*y));
+		}
+		
+		/**
+		 * M�thode pour <b>normaliser</b> un vecteur � trois dimensions. 
+		 * Un vecteur normalis� poss�de la m�me orientation, mais poss�de une <b> longeur unitaire </b>.
+		 * Si le <b>module du vecteur est nul</b>, le vecteur normalis� sera le <b> vecteur nul </b> (0.0, 0.0, 0.0).
+		 * 
+		 * @return Le vecteur normalis�.
+		 * @throws SImpossibleNormalizationException Si le vecteur ne peut pas �tre normalis� �tant trop petit (modulus() <  SMath.EPSILON) ou de longueur nulle.
+		 */
+		public Vector2d normalize()
+		{
+		  //Obtenir le module du vecteur
+		  double mod = modulus();			
+			
+			//V�rification du module. S'il est trop petit, nous ne pouvons pas num�riquement normaliser ce vecteur
+			if(mod < 0.01)
+			  return new Vector2d(0,0);
+			else
+				return new Vector2d(x/mod, y/mod);
+		}
+		
+		/**
+		 * M�thode pour effectuer le <b> produit scalaire </b> avec un autre vecteur v.
+		 * 
+		 * @param v - L'autre vecteur en produit scalaire.
+		 * @return Le produit scalaire entre les deux vecteurs.
+		 */
+		public double dot(Vector2d v)
+		{
+			return (x*v.x + y*v.y);
+		}
+		
+		public double crossAnalog(Vector2d v)
+		{
+			return (this.x*v.y - this.y*v.x);
+		}
+		
+		public Vector2d orthogonalProjectionOn(Vector2d v) {
+			return v.multiply((x*v.x + y*v.y)/((v.x*v.x) + (v.y*v.y)));
+		}
+			
+		/**
+		 * M�thode pour obtenir un vecteur avec les coordonn�e (x,y,z) les plus petites (en consid�rant le signe) parmi un ensemble de vecteurs. 
+		 * 
+		 * @param value_list La liste des vecteurs � analyser.
+		 * @return Un vecteur ayant comme coordonn�e les plus petites valeurs (x,y,z) trouv�es.
+		 */
+		public static Vector2d findMinValue(List<Vector2d> value_list)
+	  {
+		  return findMinValue(value_list.toArray(new Vector2d[value_list.size()]));
+	  }
+		
+		/**
+		 * M�thode pour obtenir un vecteur avec les coordonn�e (x,y,z) les plus petites (en consid�rant le signe) parmi un ensemble de vecteurs. 
+		 * 
+		 * @param tab - Le tableau des vecteurs � analyser.
+		 * @return Un vecteur ayant comme coordonn�e les plus petites valeurs (x,y,z) trouv�es.
+		 */
+		public static Vector2d findMinValue(Vector2d[] tab)
+		{
+		  double x_min = tab[0].getX();
+		  
+		  for(int i = 1; i < tab.length; i++)
+		    if(x_min > tab[i].getX())
+		      x_min = tab[i].getX();
+		  
+		  double y_min = tab[0].getY();
+	    
+	    for(int i = 1; i < tab.length; i++)
+	      if(y_min > tab[i].getY())
+	        y_min = tab[i].getY();
+	    
+	    return new Vector2d(x_min, y_min);
+		}
+		
+		/**
+	   * M�thode pour obtenir un vecteur avec les coordonn�e (x,y,z) les plus grandes (en consid�rant le signe) parmi un ensemble de vecteurs. 
+	   * 
+	   * @param value_list La liste des vecteurs � analyser.
+	   * @return Un vecteur ayant comme coordonn�e les plus grandes valeurs (x,y,z) trouv�es.
+	   */
+	  public static Vector2d findMaxValue(List<Vector2d> value_list)
+	  {
+	    return findMaxValue(value_list.toArray(new Vector2d[value_list.size()]));
+	  }
+	  
+		/**
+	   * M�thode pour obtenir un vecteur avec les coordonn�e (x,y,z) les plus grandes (en consid�rant le signe) parmi un ensemble de vecteurs. 
+	   * 
+	   * @param tab - Le tableau des vecteurs � analyser.
+	   * @return Un vecteur ayant comme coordonn�e les plus grandes valeurs (x,y,z) trouv�es.
+	   */
+	  public static Vector2d findMaxValue(Vector2d[] tab)
+	  {
+	    double x_max = tab[0].getX();
+	    
+	    for(int i = 1; i < tab.length; i++)
+	      if(x_max < tab[i].getX())
+	        x_max = tab[i].getX();
+	    
+	    double y_max = tab[0].getY();
+	    
+	    for(int i = 1; i < tab.length; i++)
+	      if(y_max < tab[i].getY())
+	        y_max = tab[i].getY();
+	    
+	    return new Vector2d(x_max, y_max);
+	  }
+	  
+	  public static Vector2d findClosestAngleValue(Vector2d[] tab,Vector2d closestVector) {
+		  int indexClosest = 0;
+		  double angleClosest = angleBetween(tab[0], closestVector);
+		  
+		  for(int i = 1; i < tab.length; i++) {
+			  if(angleBetween(tab[i], closestVector) < angleClosest) {
+				  indexClosest = i;
+			  }
+		  }
+		  
+		  return tab[indexClosest];
+	  }
+		/**
+		 * M�thode pour �crire les param�tres xyz du vecteur dans un fichier en format txt. Le format de l'�criture est "x"  "y"  "z" comme l'exemple suivant : 0.6  0.2  0.5
+		 * 
+		 * @param bw Le buffer d'�criture.
+		 * @throws IOException S'il y a une erreur avec le buffer d'�criture.
+		 * @see BufferedWriter
+		 */
+		public void write(BufferedWriter bw)throws IOException
+		{
+			bw.write(toString());
+		}
+		/**
+		 * M�thode qui renvoie une chaine de charact�re sur les composantes en x,y et z 
+		 * 
+		 */
+		@Override
+		public String toString()
+		{
+			return "[" + x + ", " + y + "]";		
+		}
+
+		@Override
+	  public int hashCode()
+	  {
+	    //hashcode autog�n�r� par Eclipse avec les param�tres x, y
+		  final int prime = 31;
+	    int result = 1;
+	    long temp;
+	    temp = Double.doubleToLongBits(x);
+	    result = prime * result + (int) (temp ^ (temp >>> 32));
+	    temp = Double.doubleToLongBits(y);
+	    result = prime * result + (int) (temp ^ (temp >>> 32));
+	    return result;
+	  }
+
+	  @Override
+	  public boolean equals(Object obj)
+	  {
+	    if(this == obj)
+	      return true;
+	    
+	    if(obj == null)
+	      return false;
+	    
+	    if(!(obj instanceof Vector2d))
+	      return false;
+	    
+	    Vector2d other = (Vector2d) obj;
+	    
+	    //Comparaison des valeurs x,y et z en utilisant la m�thode de comparaison de SMath
+	    if(x != other.x)
+	      return false;
+	    
+	    if(y != other.y)
+	      return false;
+	    
+	    return true;
+	  }
+
+	//----------------------------------------------------------------------------------------------
+	//M�thodes pour calcul sp�cialis� (afin de r�duire l'allocation de m�moire lors des calculs) 
+	//----------------------------------------------------------------------------------------------
+	 
+	  /**
+	   * M�thode pour obtenir la distance entre deux points.
+	   * 
+	   * @param A Le premier point.
+	   * @param B Le deuxi�me point.
+	   * @return La distance entre le point A et B.
+	   */
+	  public static double distance(Vector2d A, Vector2d B)
+	  {
+	    double dx = B.x - A.x;
+	    double dy = B.y - A.y;
+	    
+	    return Math.sqrt(dx*dx + dy*dy);
+	  }
+	  
+	  /**
+	   * M�thode permettant d'obtenir l'angle entre deux vecteurs A et B. L'angle sera obtenu en radian.
+	   * 
+	   * @param A Le premier vecteur.
+	   * @param B Le second vecteur. 
+	   * @return L'angle entre les deux vecteurs.
+	   */
+	  public static double angleBetween(Vector2d A, Vector2d B)
+	  {
+	    double cosO = A.dot(B)/(A.modulus()*B.modulus());
+	    
+	    return Math.acos(cosO);
+	  }
+	 
+	 /**
+	  * M�thode qui effectue une op�ration sp�cialis�e de multiplication par un scalaire et d'addition vectorielle �quivalente �
+	  * <ul>V = a*B + C.</ul>
+	  * @param a - Le scalaire � multiplier avec B.
+	  * @param B - Le 1ier vecteur dans l'expression vectorielle.
+	  * @param C - Le 2i�me vecteur dans l'expression vectorielle � ajouter.
+	  * @return Le vecteur r�sultant de cette op�ration sp�cialis�e.
+	  */
+	 public static Vector2d AmultiplyBaddC(double a, Vector2d B, Vector2d C)
+	 {
+	   return new Vector2d(a*B.x + C.x, a*B.y + C.y);
+	 }
+
+}//fin de la classe Vector2d

@@ -1,0 +1,39 @@
+package sunrise;
+
+public enum GameEntity {
+	CaseVide(" "),
+	BlockPierre("@"),
+	BlockBrique("#"),
+	Corde("-"),
+	Echelle("H"),
+	LingotOr("$"),
+	Runner("&"),
+	Sortie("S");
+	
+	public String character;
+	
+	public int UP, LEFT, DOWN, RIGHT;
+	
+	private GameEntity(String character){
+		this.character = character;
+	}
+	
+	public int[] getCost(){
+		int[] values = {UP, LEFT, DOWN, RIGHT};
+		return values;
+	}
+	
+	public String toString(){
+		return character;
+	}
+	
+	public static GameEntity fromString(String s) {
+		for(int i = 0; i < GameEntity.values().length; i++){
+			if(values()[i].toString().equals(s)){
+				return values()[i];
+			}
+		}
+		
+		return null;
+	}
+}

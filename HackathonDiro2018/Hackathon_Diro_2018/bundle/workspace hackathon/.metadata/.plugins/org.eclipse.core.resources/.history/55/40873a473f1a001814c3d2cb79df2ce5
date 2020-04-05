@@ -1,0 +1,121 @@
+package ca.umontreal.iro.hackathon.loderunner;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.PriorityQueue;
+
+import sunrise.GameEntity;
+import sunrise.astar.AStar;
+import sunrise.astar.Graph;
+import sunrise.astar.NodeAStar;
+import sunrise.vector.Vector2d;
+
+/**
+ *
+ */
+public class Runner extends BasicRunner {
+
+    // TODO : Remplacer ceci par votre clÃ© secrÃ¨te
+    public static final String ROOM = "gkog";
+
+    /* Utilisez cette variable pour choisir le niveau de dÃ©part
+     *
+     * Notez: le niveau de dÃ©part sera 1 pour tout
+     * le monde pendant la compÃ©tition :v)
+     */
+    public static final int START_LEVEL = 5;
+    
+    private GameEntity[][] elements;
+    
+    private int index;
+    private List<NodeAStar> listeDeNoeuds;   
+    private List<NodeAStar> listeDeSous;
+    
+    private NodeAStar currentPosition;
+    private NodeAStar expectedPosition;
+    private NodeAStar doorPosition;
+    
+    private PriorityQueue<Move> nextActions;
+    
+    public Runner() {
+        super(ROOM, START_LEVEL);
+    }
+
+    @Override
+    public void start(String[] grid) {
+    	nextActions = new PriorityQueue<Move>();
+    	listeDeNoeuds = new ArrayList<NodeAStar>();   
+    	listeDeSous= new ArrayList<NodeAStar>();
+        elements = new GameEntity[grid[0].length()][grid.length];
+        
+        for (int i=0; i<grid.length; i++) {
+            for(int j = 0; j < grid[0].length(); j++){
+            	elements[i][j] = GameEntity.fromString(String.valueOf(grid[i].charAt(j)));
+            	if(elements[i][j].equals( GameEntity.Sortie)) {
+            		doorPosition = new NodeAStar(new Vector2d(i, j)); 
+            	}
+            	if(elements[i][j].equals( GameEntity.LingotOr)) {
+            		listeDeSous.add(new NodeAStar(new Vector2d(i, j))); 
+            	}
+            }
+        }
+        
+        
+        printMap();
+    }
+
+    @Override
+    public Move next(int x, int y) {    	
+    	currentPosition = new NodeAStar(new Vector2d(x, y));
+    
+ 
+    		if(nextActions.isEmpty()){
+        		if(listeDeNoeuds == null || expectedPosition == null || listeDeNoeuds.isEmpty() || !expectedPosition.getPos().equals(currentPosition.getPos()) ) {
+        			elements[(int) currentPosition.getPos().getX()][(int) currentPosition.getPos().getY()] = GameEntity.CaseVide;
+        			listeDeNoeuds = getListeDeNoeudsOptimal();
+        			index = 0;
+        		}
+    	    	
+    		int direction = Direction.prochaineDirectionAStar(listeDeNoeuds, index);
+    		Direction dir = Direction.fromInt(direction);
+        	
+        	Move nextMove = new Move(Event.MOVE, dir);
+        	
+        	expectedPosition = listeDeNoeuds.get(++index);
+
+            return nextMove;
+    	} else {
+    		if(nextActions.peek().event.equals(Event.MOVE)){
+    			
+    		}
+    		
+    		return nextActions.remove();
+    	}
+    }
+    
+    private List<NodeAStar> getListeDeNoeudsOptimal() {
+    	listeDeNoeuds = new ArrayList<NodeAStar>();
+    	listeDeNoeuds.addAll(AStar.search(new Graph(elements), currentPosition, listeDeSous.get(0)));
+    	System.out.println(listeDeNoeuds.toString());
+    	for(int x =0 ; x<listeDeSous.size()-1; x++) {
+    		ArrayList<NodeAStar> test = (ArrayList<NodeAStar>) AStar.search(new Graph(elements), listeDeSous.get(x), listeDeSous.get(x+1));
+    		listeDeNoeuds.addAll(test);
+    		System.out.println(listeDeNoeuds.toString());
+    	}
+    		ArrayList<NodeAStar> test2 = (ArrayList<NodeAStar>) AStar.search(new Graph(elements), listeDeSous.get(listeDeSous.size() -1), doorPosition);
+			listeDeNoeuds.addAll(test2);
+			System.out.println(listeDeNoeuds.toString());
+			return listeDeNoeuds;
+	}
+    
+    public void printMap(){
+    	for(int j = 0; j < elements[0].length; j++){
+    		for(int i = 0; i < elements.length; i++){
+    			System.out.print(elements[i][j]);
+    		}
+    		
+    		System.out.println();
+    	}
+    }
+}
+
